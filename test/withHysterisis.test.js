@@ -249,7 +249,7 @@ describe('useStoredReducer',()=>{
 
         rerender(
             <>
-                <WithHysterisis keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>
+                <WithHysterisis keyName={'test-key'}/>
                 <WithHysterisis keyName={'test-key'}/>
             </>
         );
