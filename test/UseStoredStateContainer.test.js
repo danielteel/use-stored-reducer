@@ -2,7 +2,7 @@ import React from 'react';
 import {screen, render, fireEvent, act, waitFor} from '@testing-library/react';
 import 'regenerator-runtime/runtime';
 
-import WithHysterisis from './WithHysterisis';
+import UseStoredStateContainer from './UseStoredStateContainer';
 
 class StorageEvent extends Event {
     constructor(key, newValue, storageArea){
@@ -47,7 +47,7 @@ beforeEach(()=>{
 describe('useStoredReducer',()=>{
     it('Render default values on render', ()=>{
         //Setup
-        render(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'Jim', age: '22'}}/>);
+        render(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'Jim', age: '22'}}/>);
 
         //Assert
         screen.getByDisplayValue('Jim');
@@ -56,7 +56,7 @@ describe('useStoredReducer',()=>{
 
     it('Render default lazy values on render', ()=>{
         //Setup
-        render(<WithHysterisis keyName={'test-key'} defaultValue={()=>({name: 'Jim', age: '22'})}/>);
+        render(<UseStoredStateContainer keyName={'test-key'} defaultValue={()=>({name: 'Jim', age: '22'})}/>);
 
         //Assert
         screen.getByDisplayValue('Jim');
@@ -66,7 +66,7 @@ describe('useStoredReducer',()=>{
     it('Renders default values from storage', ()=>{
         //Setup
         newLocalStorage.setItem('test-key', JSON.stringify({age: '34', name: 'Jeffrey'}));
-        render(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'Bob', age: '23'}}/>);
+        render(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'Bob', age: '23'}}/>);
 
         //Assert
         screen.getByDisplayValue('Jeffrey');
@@ -76,10 +76,10 @@ describe('useStoredReducer',()=>{
     it("updating keyName prop to uninitialized key will render default values", ()=>{
         //Setup
         newLocalStorage.setItem('test-key', JSON.stringify({age: '34', name: 'Jeffrey'}));
-        const {rerender} = render(<WithHysterisis keyName={'test-key'}/>);
+        const {rerender} = render(<UseStoredStateContainer keyName={'test-key'}/>);
 
         //Exercise
-        rerender(<WithHysterisis keyName={'different-test-key'} defaultValue={{name: 'I should be found', age: 'same with me'}}/>);
+        rerender(<UseStoredStateContainer keyName={'different-test-key'} defaultValue={{name: 'I should be found', age: 'same with me'}}/>);
 
         //Assert
         screen.getByDisplayValue('I should be found');
@@ -88,10 +88,10 @@ describe('useStoredReducer',()=>{
 
     it("updating defaultValue will not change state",()=>{
         //Setup
-        const {rerender} = render(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'Bob', age: '23'}}/>);
+        const {rerender} = render(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'Bob', age: '23'}}/>);
         
         //Exercise
-        rerender(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'Dan', age: '32'}}/>);
+        rerender(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'Dan', age: '32'}}/>);
 
        //Assert
        screen.getByDisplayValue('Bob');
@@ -101,13 +101,13 @@ describe('useStoredReducer',()=>{
 
     it("updating state in one hook will change state of other hooks with same keyName",()=>{
         //Setup
-        render(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'Bob', age: '23'}}/>);
+        render(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'Bob', age: '23'}}/>);
         
         const nameInput = screen.getByDisplayValue('Bob');
         const ageInput = screen.getByDisplayValue('23');
 
-        render(<WithHysterisis keyName={'test-key'}/>);
-        render(<WithHysterisis keyName={'test-key'}/>);
+        render(<UseStoredStateContainer keyName={'test-key'}/>);
+        render(<UseStoredStateContainer keyName={'test-key'}/>);
 
         //Exercise
         fireEvent.change(nameInput, {target: {value: 'Jessica'}});
@@ -120,13 +120,13 @@ describe('useStoredReducer',()=>{
 
     it("updating state in one hook will does not affect state of other hooks with different keyNames",()=>{
         //Setup
-        render(<WithHysterisis keyName={'test-key1'} defaultValue={{name: 'Bob', age: '23'}}/>);
+        render(<UseStoredStateContainer keyName={'test-key1'} defaultValue={{name: 'Bob', age: '23'}}/>);
         
         const nameInput = screen.getByDisplayValue('Bob');
         const ageInput = screen.getByDisplayValue('23');
 
-        render(<WithHysterisis keyName={'test-key2'} defaultValue={{name: 'Jimbo', age: '12'}}/>);
-        render(<WithHysterisis keyName={'test-key3'} defaultValue={{name: 'Jonbo', age: '34'}}/>);
+        render(<UseStoredStateContainer keyName={'test-key2'} defaultValue={{name: 'Jimbo', age: '12'}}/>);
+        render(<UseStoredStateContainer keyName={'test-key3'} defaultValue={{name: 'Jonbo', age: '34'}}/>);
 
         //Exercise
         fireEvent.change(nameInput, {target: {value: 'Jessica'}});
@@ -143,7 +143,7 @@ describe('useStoredReducer',()=>{
 
     it("updating state many times with hysterisis set to null will result in immediate setItem calls", async ()=>{
         //Setup
-        const {rerender} = render(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'initial-name', age: 99}}/>);
+        const {rerender} = render(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'initial-name', age: 99}}/>);
 
         const nameInput = screen.getByDisplayValue('initial-name');
 
@@ -168,7 +168,7 @@ describe('useStoredReducer',()=>{
 
     it("updating state with hysterisis multiple times within hysterisisTime period should result in only one setItem call", async ()=>{
         //Setup
-        const {rerender} = render(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}} hysterisis={500}/>);
+        const {rerender} = render(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}} hysterisis={500}/>);
 
         const nameInput = screen.getByDisplayValue('name-input');
         const ageInput = screen.getByDisplayValue('99');
@@ -194,14 +194,14 @@ describe('useStoredReducer',()=>{
 
     it("updating keyName or defaultValue or hysterisisTime wont leave stale closure",()=>{
         //Setup
-        const {rerender} = render(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>);
+        const {rerender} = render(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>);
 
         const nameInput = screen.getByDisplayValue('name-input');
         const ageInput = screen.getByDisplayValue('99');
 
 
         //Exercise
-        render(<WithHysterisis keyName={'different-test-key'} defaultValue={{name: 'Aba', age: '21'}} hysterisis={10}/>);
+        render(<UseStoredStateContainer keyName={'different-test-key'} defaultValue={{name: 'Aba', age: '21'}} hysterisis={10}/>);
         fireEvent.change(nameInput, {target: {value: 'Jess'}});
         fireEvent.change(ageInput, {target: {value: '65'}});
 
@@ -212,7 +212,7 @@ describe('useStoredReducer',()=>{
 
     it('updates state from localStorage StorageEvents', () => {
         //Setup
-        render(<WithHysterisis keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>);
+        render(<UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>);
 
         //Exercise
         storageEvent(localStorage, 'test-key', JSON.stringify({name:'Jimbo', age:'15'}));
@@ -226,8 +226,8 @@ describe('useStoredReducer',()=>{
         //Setup
         let {rerender} = render(
             <>
-                <WithHysterisis keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>
-                <WithHysterisis keyName={'test-key'}/>
+                <UseStoredStateContainer keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>
+                <UseStoredStateContainer keyName={'test-key'}/>
             </>
         );
         
@@ -239,8 +239,8 @@ describe('useStoredReducer',()=>{
 
         rerender(
             <>
-                <WithHysterisis keyName={'other-key'} defaultValue={{name: 'name-input', age: '99'}}/>
-                <WithHysterisis keyName={'test-key'}/>
+                <UseStoredStateContainer keyName={'other-key'} defaultValue={{name: 'name-input', age: '99'}}/>
+                <UseStoredStateContainer keyName={'test-key'}/>
             </>
         );
 
@@ -249,8 +249,8 @@ describe('useStoredReducer',()=>{
 
         rerender(
             <>
-                <WithHysterisis keyName={'test-key'}/>
-                <WithHysterisis keyName={'test-key'}/>
+                <UseStoredStateContainer keyName={'test-key'}/>
+                <UseStoredStateContainer keyName={'test-key'}/>
             </>
         );
 
