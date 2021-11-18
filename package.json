@@ -1,0 +1,33 @@
+{
+  "name": "@dteel/use-stored-reducer",
+  "description": "useStoredReducer, kind of like useReducer except it will persist in localStorage. Will stay in sync with other hooks across your app and across brower windows.",
+  "version": "0.0.0",
+  "main": "useStoredReducer.js",
+  "type": "module",
+  "author": "Dan Teel",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielteel/use-stored-reducer.git"
+  },
+  "peerDependencies": {
+    "react": ">=16.9.0"
+  },
+  "devDependencies": {
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "babel-jest": "^27.3.1",
+    "jest": "^27.3.1",
+    "@babel/preset-react": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "@testing-library/react": "^12.1.2",
+    "@testing-library/jest-dom": "^5.15.0"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "verbose": true,
+    "testEnvironment": "jsdom"
+  }
+}
