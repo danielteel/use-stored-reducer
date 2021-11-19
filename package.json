@@ -2,7 +2,7 @@
   "name": "@dteel/use-stored-reducer",
   "description": "useStoredReducer, kind of like useReducer except it will persist in localStorage. Will stay in sync with other hooks across your app and across brower windows.",
   "version": "0.0.1",
-  "main": "useStoredReducer.js",
+  "main": "src/useStoredReducer.js",
   "type": "module",
   "author": "Dan Teel",
   "license": "ISC",
