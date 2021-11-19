@@ -7,8 +7,6 @@ function reducer(state, action, payload) {
             return {...state, age: Number(payload)};
         case 'name':
             return {...state, name: payload};
-        default:
-            throw Error("undefined reducer action", state, action, payload);
     }
 }
 
