@@ -1,4 +1,5 @@
-node_modules
 test
 .gitignore
 package-lock.json
+.github
+babel.config.cjs
