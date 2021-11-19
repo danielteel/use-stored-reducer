@@ -7,6 +7,8 @@ function reducer(state, action, payload) {
             return {...state, age: Number(payload)};
         case 'name':
             return {...state, name: payload};
+        default:
+            return state;
     }
 }
 
