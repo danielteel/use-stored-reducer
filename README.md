@@ -10,7 +10,7 @@ Install the package from npm with
 ```sh
 npm install @dteel/use-stored-reducer
 ```
-And use import it into one of your react components
+And import it into one of your react components
 ```javascript
 import {useStoredReducer} from '@dteel/use-stored-reducer';
 ```
