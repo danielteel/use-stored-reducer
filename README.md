@@ -7,7 +7,7 @@ For performance optimization, it optionally takes a hysterisis argument, which i
 
 ## Add it to your project
 Install the package from npm with
-```javascript
+```sh
 npm install @dteel/use-stored-reducer
 ```
 And use import it into one of your react components
