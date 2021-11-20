@@ -158,6 +158,7 @@ function useStoredReducer (keyName, reducer, initialValue, withHysterisis=null) 
     const notFirstRender = useRef(false);
     const setRenderRef = useRef(() => setRender(v => ({})));
     const dispatchRef = useRef(dispatch.bind(null, keyName, setRenderRef, reducer, stateRef, withHysterisis));
+    const keyNameRef = useRef(null);
 
     if (!notFirstRender.current){
         if (typeof initialValue==='function'){
@@ -180,12 +181,15 @@ function useStoredReducer (keyName, reducer, initialValue, withHysterisis=null) 
     }, [keyName]);
 
     useEffect(() => {
-        if (initSubscribeStorage(keyName, typeof initialValue==='function'?initialValue():initialValue)){
-            keyEvent(keyName, subscriberDataStore[keyName], withHysterisis);
-        }else{
-            stateRef.current = subscriberDataStore[keyName];
+        if (keyNameRef.current!==keyName){
+            keyNameRef.current=keyName;
+            if (initSubscribeStorage(keyName, typeof initialValue==='function'?initialValue():initialValue)){
+                keyEvent(keyName, subscriberDataStore[keyName], withHysterisis);
+            }else{
+                stateRef.current = subscriberDataStore[keyName];
+            }
+            setRenderRef.current();
         }
-        setRenderRef.current();
     }, [keyName, initialValue]);
 
     useEffect(() => {
