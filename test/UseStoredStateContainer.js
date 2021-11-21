@@ -12,8 +12,8 @@ function reducer(state, action, payload) {
     }
 }
 
-export default function withHysterisis({keyName, defaultValue, hysterisis}){
-    const [state, dispatchRef] = useStoredReducer(keyName, reducer, defaultValue, hysterisis);
+export default function withHysterisis({keyName, defaultValue, hysterisis, storageObject}){
+    const [state, dispatchRef] = useStoredReducer(keyName, reducer, defaultValue, storageObject, hysterisis);
     return (
         <>
             <input data-testid='age-input' type='text' value={state?.age || ' '} onChange={(e)=>dispatchRef.current('age', e.target.value)}/>
