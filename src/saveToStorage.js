@@ -11,7 +11,7 @@ function cancelSaveToStorage(storageObject, key){
 }
 
 function flushSaveToStorage(onlyThisStorageObject=null, onlyThisKey=null){
-    for (let savePair of saveToStorageQueue){
+    saveToStorageQueue = saveToStorageQueue.filter( (savePair) => {
         if ((onlyThisStorageObject===null || onlyThisKey===null) || (savePair.storageObject===onlyThisStorageObject && savePair.key===onlyThisKey)){
             clearTimeout(savePair.timeoutId);
             try {
@@ -19,9 +19,10 @@ function flushSaveToStorage(onlyThisStorageObject=null, onlyThisKey=null){
             } catch {
                 console.error("flushSaveToStorage: cant save key:", savePair.key," value:",savePair.value)
             }
+            return false;
         }
-    }
-    saveToStorageQueue=[];
+        return true;
+    });
 }
 
 function saveToStorage(storageObject, key, value, hystersisTime=null){
@@ -41,7 +42,6 @@ function saveToStorage(storageObject, key, value, hystersisTime=null){
         }
     } else {
         const timeoutId = setTimeout( () => {
-            console.log(key, value);
             const existingSaveIndex = saveToStorageQueue.findIndex( item => item.key===key );
             
             if (existingSaveIndex>=0){
@@ -52,8 +52,7 @@ function saveToStorage(storageObject, key, value, hystersisTime=null){
                     console.error("saveToStorage: cant save key:", key," value:",value)
                 }
             }
-        }, hystersisTime)
-
+        }, hystersisTime);
         saveToStorageQueue.push({key, value, timeoutId, storageObject});
     }
 }
