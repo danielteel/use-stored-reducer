@@ -215,7 +215,7 @@ describe('useStoredReducer',()=>{
 
         //Exercise
         storageEvent(localStorage, 'test-key', JSON.stringify({name:'Jimbo', age:'15'}));
-        
+
         //Assert
         screen.getByDisplayValue('Jimbo');
         screen.getByDisplayValue('15')

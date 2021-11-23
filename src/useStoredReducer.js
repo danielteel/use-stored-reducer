@@ -1,6 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {initInDataStore, getFromDataStore, setInDataStore, broadcastChange, subscribeToKeyEvents, unsubscribeToKeyEvents} from './subscribe';
-import {saveToStorage, flushSaveToStorage} from './saveToStorage';
+import {initInDataStore, getFromDataStore, broadcastChange, subscribeToKeyEvents, unsubscribeToKeyEvents} from './subscribe';
 
 
 
