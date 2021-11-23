@@ -1,3 +1,5 @@
+import {saveToStorage, flushSaveToStorage} from './saveToStorage';
+
 let subscriptions = [];
 let newSubscriptionId = 0;
 let hasStorageEventListener = false;
@@ -67,7 +69,7 @@ function broadcastChange(storageObject, key, newValue, withHysterisis, fromStora
         if (!fromStorage){
             try {
                 if (withHysterisis){
-                    saveToStorageWithHystersis(storageObject, key, newValue, Number(withHysterisis));
+                    saveToStorage(storageObject, key, newValue, Number(withHysterisis));
                 }else{
                     storageObject.setItem(key, JSON.stringify(newValue));
                 }

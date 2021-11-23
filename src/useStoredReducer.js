@@ -1,11 +1,12 @@
 import {useEffect, useRef, useState} from 'react';
-
+import {initInDataStore, getFromDataStore, setInDataStore, broadcastChange, subscribeToKeyEvents, unsubscribeToKeyEvents} from './subscribe';
+import {saveToStorage, flushSaveToStorage} from './saveToStorage';
 
 
 
 function dispatch (keyName, setRenderRef, reducer, stateRef, withHysterisis, storageObject, action, payload) {
     const newValue = reducer(stateRef.current, action, payload);
-    keyEvent(storageObject, keyName, newValue, withHysterisis);
+    broadcastChange(storageObject, keyName, newValue, withHysterisis);
     setRenderRef.current();
 }
 
@@ -16,6 +17,7 @@ function useStoredReducer (keyName, reducer, initialValue, storageObject=localSt
     const setRenderRef = useRef(() => setRender(v => ({})));
     const dispatchRef = useRef(dispatch.bind(null, keyName, setRenderRef, reducer, stateRef, withHysterisis, storageObject));
     const keyNameRef = useRef(null);
+    const storageObjRef = useRef(null);
 
     if (!notFirstRender.current){
         if (typeof initialValue==='function'){
@@ -27,7 +29,7 @@ function useStoredReducer (keyName, reducer, initialValue, storageObject=localSt
     }
 
     useEffect(() => {
-        const subscriberId = subscribeToKeyEvents(keyName, (value) => {
+        const subscriberId = subscribeToKeyEvents(storageObject, keyName, (value) => {
             stateRef.current = value;
             setRenderRef.current();
         });
@@ -35,15 +37,17 @@ function useStoredReducer (keyName, reducer, initialValue, storageObject=localSt
         return() => {
             unsubscribeToKeyEvents(subscriberId);
         }
-    }, [keyName]);
+    }, [keyName, storageObject]);
 
     useEffect(() => {
-        if (keyNameRef.current!==keyName){
+        if (keyNameRef.current!==keyName || storageObjRef.current!==storageObject){
             keyNameRef.current=keyName;
-            if (initSubscribeStorage(keyName, typeof initialValue==='function'?initialValue():initialValue)){
-                keyEvent(storageObject, keyName, subscriberDataStore[keyName], withHysterisis);
+            storageObjRef.current=storageObject;
+
+            if (initInDataStore(storageObject, keyName, typeof initialValue==='function'?initialValue():initialValue)){
+                broadcastChange(storageObject, keyName, getFromDataStore(storageObject, keyName), withHysterisis);
             }else{
-                stateRef.current = subscriberDataStore[keyName];
+                stateRef.current = getFromDataStore(storageObject, keyName);
             }
             setRenderRef.current();
         }

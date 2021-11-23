@@ -168,7 +168,7 @@ describe('useStoredReducer',()=>{
 
     it("updating state with hysterisis multiple times within hysterisisTime period should result in only one setItem call", async ()=>{
         //Setup
-        const {rerender} = render(<UseStoredStateContainer storageObject={localStorage} keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}} hysterisis={500}/>);
+        render(<UseStoredStateContainer storageObject={localStorage} keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}} hysterisis={100}/>);
 
         const nameInput = screen.getByDisplayValue('name-input');
         const ageInput = screen.getByDisplayValue('99');
@@ -189,16 +189,15 @@ describe('useStoredReducer',()=>{
             expect(spy).toHaveBeenCalledTimes(1);
             expect(spy.mock.calls[0][0]).toBe('test-key');
             expect(JSON.parse(spy.mock.calls[0][1])).toEqual({age: 13, name: 'Joseph'})
-        }, {timeout: 1500});
+        }, {timeout: 1000});
     });
 
     it("updating keyName or defaultValue or hysterisisTime wont leave stale closure",()=>{
         //Setup
-        const {rerender} = render(<UseStoredStateContainer storageObject={localStorage} keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>);
+        render(<UseStoredStateContainer storageObject={localStorage} keyName={'test-key'} defaultValue={{name: 'name-input', age: '99'}}/>);
 
         const nameInput = screen.getByDisplayValue('name-input');
         const ageInput = screen.getByDisplayValue('99');
-
 
         //Exercise
         render(<UseStoredStateContainer storageObject={localStorage} keyName={'different-test-key'} defaultValue={{name: 'Aba', age: '21'}} hysterisis={10}/>);
@@ -230,7 +229,7 @@ describe('useStoredReducer',()=>{
                 <UseStoredStateContainer storageObject={localStorage} keyName={'test-key'}/>
             </>
         );
-        
+
 
         //Exercise
         const firstNameInput = screen.getAllByDisplayValue('name-input')[0];
@@ -256,7 +255,6 @@ describe('useStoredReducer',()=>{
 
         fireEvent.change(firstNameInput, {target: {value: 'abcde'}});
 
-        
         //Assert
         expect(screen.getAllByDisplayValue('abcde')).toHaveLength(2);
     });
