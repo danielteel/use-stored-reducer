@@ -38,10 +38,19 @@ function localAndSessionStorageHandler(e) {
     }
 }
 
+function customStorageEventHandler(storageObject, key, newValue){
+    broadcastChange(storageObject, key, newValue);
+}
+
 function subscribeToKeyEvents(storageObject, key, callback) {
     if (!hasStorageEventListener && (storageObject===localStorage || storageObject===sessionStorage)) {
         hasStorageEventListener = true;
         window.addEventListener('storage', localAndSessionStorageHandler);
+    }else if (storageObject!==localStorage && storageObject!==sessionStorage){
+        //If storage object is not local or session storage and has subscribe method, subscribe to it
+        if (typeof storageObject.subscribe === 'function'){
+            storageObject.subscribe(customStorageEventHandler);
+        }
     }
 
     subscriptions.push({id: newSubscriptionId, storageObject, key, callback});
