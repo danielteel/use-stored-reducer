@@ -2,7 +2,9 @@ import React from 'react';
 import {screen, render, fireEvent, act, waitFor} from '@testing-library/react';
 import 'regenerator-runtime/runtime';
 
-import UseStoredStateContainer from './UseStoredStateContainer';
+import {newFakeStorage, setupStorageMocks, resetStorageMocks, teardownStorageMocks} from './common';
+
+import UseStoredStateContainer from './TestUseStoredReducer';
 
 class StorageEvent extends Event {
     constructor(key, newValue, storageArea){
@@ -18,27 +20,17 @@ function storageEvent(storageObject, key, newValue){
     });
 }
 
-//LocalStorage Mocking - JSDOM needs it to be with defineProperty
-let oldLocalStorage=null;
-let newLocalStorage=null;
 beforeAll(()=>{
-    oldLocalStorage=localStorage;
-    newLocalStorage = {
-        clear: ()=>oldLocalStorage.clear(),
-        key: (...args)=>oldLocalStorage.key(...args),
-        removeItem: (...args)=>oldLocalStorage.removeItem(...args),
-        getItem: (...args)=>oldLocalStorage.getItem(...args),
-        setItem: (...args) =>oldLocalStorage.setItem(...args)
-    };
-    Object.defineProperty(window, 'localStorage', {value: newLocalStorage, writable: false});
+    jest.useFakeTimers('modern');
+    setupStorageMocks();
 });
 
 afterAll(()=>{
-    Object.defineProperty(window, 'localStorage', {value: oldLocalStorage, writable: false});
+    teardownStorageMocks();
 });
 
 beforeEach(()=>{
-    newLocalStorage.clear();
+    resetStorageMocks();
     jest.clearAllMocks();
 })
 
@@ -65,7 +57,7 @@ describe('useStoredReducer',()=>{
 
     it('Renders default values from storage', ()=>{
         //Setup
-        newLocalStorage.setItem('test-key', JSON.stringify({age: '34', name: 'Jeffrey'}));
+        localStorage.setItem('test-key', JSON.stringify({age: '34', name: 'Jeffrey'}));
         render(<UseStoredStateContainer storageObject={localStorage} keyName={'test-key'} defaultValue={{name: 'Bob', age: '23'}}/>);
 
         //Assert
@@ -75,7 +67,7 @@ describe('useStoredReducer',()=>{
 
     it("updating keyName prop to uninitialized key will render default values", ()=>{
         //Setup
-        newLocalStorage.setItem('test-key', JSON.stringify({age: '34', name: 'Jeffrey'}));
+        localStorage.setItem('test-key', JSON.stringify({age: '34', name: 'Jeffrey'}));
         const {rerender} = render(<UseStoredStateContainer storageObject={localStorage} keyName={'test-key'}/>);
 
         //Exercise
@@ -147,7 +139,7 @@ describe('useStoredReducer',()=>{
 
         const nameInput = screen.getByDisplayValue('initial-name');
 
-        const spy = jest.spyOn(newLocalStorage, 'setItem');
+        const spy = jest.spyOn(localStorage, 'setItem');
 
         //Exercise
         fireEvent.change(nameInput, {target: {value: 'Jess'}});
@@ -173,7 +165,7 @@ describe('useStoredReducer',()=>{
         const nameInput = screen.getByDisplayValue('name-input');
         const ageInput = screen.getByDisplayValue('99');
 
-        const spy = jest.spyOn(newLocalStorage, 'setItem');
+        const spy = jest.spyOn(localStorage, 'setItem');
 
         //Exercise
         fireEvent.change(nameInput, {target: {value: 'Jess'}});
@@ -257,5 +249,30 @@ describe('useStoredReducer',()=>{
 
         //Assert
         expect(screen.getAllByDisplayValue('abcde')).toHaveLength(2);
+    });
+
+    it('same key name different storage objects dont sync to each other', ()=>{
+        //Setup
+        const fakeStorage = newFakeStorage();
+        
+        render(<>
+            <UseStoredStateContainer storageObject={localStorage} keyName={'test-key'} defaultValue={{name: 'local-name', age: '11'}}/>
+            <UseStoredStateContainer storageObject={fakeStorage} keyName={'test-key'} defaultValue={{name: 'fake-name', age: '22'}}/>
+        </>);
+
+        //Assert, defaultValues are being saved on first render
+        expect(localStorage.getItem('test-key')).toBe(JSON.stringify({name: 'local-name', age: '11'}))
+        expect(fakeStorage.getItem('test-key')).toBe(JSON.stringify({name: 'fake-name', age: '22'}))
+        
+        //Exercise, change localStorage and fakeStorage values
+        const firstNameInput = screen.getByDisplayValue('local-name');
+        fireEvent.change(firstNameInput, {target: {value: 'Im Real'}});
+
+        const secondNameInput = screen.getByDisplayValue('fake-name');
+        fireEvent.change(secondNameInput, {target: {value: 'Im Fake'}});
+
+        //Assert, changes save over the default values saved
+        expect(localStorage.getItem('test-key')).toBe(JSON.stringify({name: 'Im Real', age: '11'}))
+        expect(fakeStorage.getItem('test-key')).toBe(JSON.stringify({name: 'Im Fake', age: '22'}))
     });
 });

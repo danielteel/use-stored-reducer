@@ -1,47 +1,20 @@
 import { saveToStorage, flushSaveToStorage } from "../src/saveToStorage";
 
 import 'regenerator-runtime/runtime';
-import {screen, render, fireEvent, act, waitFor} from '@testing-library/react';
+import {setupStorageMocks, resetStorageMocks, teardownStorageMocks} from './common';
 
-//LocalStorage Mocking - JSDOM needs it to be with defineProperty
-let oldLocalStorage=null;
-let newLocalStorage=null;
-let oldSessionStorage=null;
-let newSessionStorage=null;
 beforeAll(()=>{
-    oldLocalStorage=localStorage;
-    newLocalStorage = {
-        clear: ()=>oldLocalStorage.clear(),
-        key: (...args)=>oldLocalStorage.key(...args),
-        removeItem: (...args)=>oldLocalStorage.removeItem(...args),
-        getItem: (...args)=>oldLocalStorage.getItem(...args),
-        setItem: (...args) =>oldLocalStorage.setItem(...args)
-    };
-    Object.defineProperty(window, 'localStorage', {value: newLocalStorage, writable: false});
-
-    oldSessionStorage=sessionStorage;
-    newSessionStorage = {
-        clear: ()=>oldSessionStorage.clear(),
-        key: (...args)=>oldSessionStorage.key(...args),
-        removeItem: (...args)=>oldSessionStorage.removeItem(...args),
-        getItem: (...args)=>oldSessionStorage.getItem(...args),
-        setItem: (...args) =>oldSessionStorage.setItem(...args)
-    };
-    Object.defineProperty(window, 'sessionStorage', {value: newSessionStorage, writable: false});
-
     jest.useFakeTimers('modern');
+    setupStorageMocks();
 });
 
 afterAll(()=>{
-    Object.defineProperty(window, 'localStorage', {value: oldLocalStorage, writable: false});
-    Object.defineProperty(window, 'sessionStorage', {value: oldSessionStorage, writable: false});
+    teardownStorageMocks();
 });
 
 beforeEach(()=>{
-    newLocalStorage.clear();
-    newSessionStorage.clear();
+    resetStorageMocks();
     jest.clearAllMocks();
-    jest.useFakeTimers('modern');
 })
 
 describe('saveToStorage', ()=>{
@@ -49,7 +22,7 @@ describe('saveToStorage', ()=>{
         //setup
         const dataToStore = {value: 100};
         const keyName = 'key';
-        const setItemSpy = jest.spyOn(newLocalStorage, 'setItem');
+        const setItemSpy = jest.spyOn(localStorage, 'setItem');
 
         //exercise
         saveToStorage(localStorage, keyName, dataToStore);
@@ -63,7 +36,7 @@ describe('saveToStorage', ()=>{
         const timeoutTime = 250;
         const dataToStore = {value: 99};
         const keyName = 'name';
-        const setItemSpy = jest.spyOn(newLocalStorage, 'setItem');
+        const setItemSpy = jest.spyOn(localStorage, 'setItem');
         const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
 
         //exercise
@@ -85,7 +58,7 @@ describe('saveToStorage', ()=>{
         const timeoutTime = 100;
         const dataToStore = {value: 90};
         const keyName = 'asdad';
-        const setItemSpy = jest.spyOn(newLocalStorage, 'setItem');
+        const setItemSpy = jest.spyOn(localStorage, 'setItem');
         const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
         const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
 
@@ -110,7 +83,7 @@ describe('saveToStorage', ()=>{
         const dataToStore = {value: 10};
         const keyName1 = 'dbsd';
         const keyName2 = 'gdfd';
-        const setItemSpy = jest.spyOn(newLocalStorage, 'setItem');
+        const setItemSpy = jest.spyOn(localStorage, 'setItem');
         const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
 
         //exercise
@@ -136,8 +109,8 @@ describe('saveToStorage', ()=>{
         const dataToStore = {value: 10};
         const keyName1 = 'dbsd';
         const keyName2 = 'gdfd';
-        const setLocalSpy = jest.spyOn(newLocalStorage, 'setItem');
-        const setSessionSpy = jest.spyOn(newSessionStorage, 'setItem');
+        const setLocalSpy = jest.spyOn(localStorage, 'setItem');
+        const setSessionSpy = jest.spyOn(sessionStorage, 'setItem');
 
         //exercise
         saveToStorage(localStorage, keyName1, dataToStore, timeoutTime);
