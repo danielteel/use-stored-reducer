@@ -19,7 +19,7 @@ import {useStoredReducer} from '@dteel/use-stored-reducer';
 
 The hooks signature is 
 ```javascript
-const [state, dispatchRef] = useStoredReducer(keyName, reducer, initialValue, withHysterisis=null)
+const [state, dispatchRef] = useStoredReducer(keyName, reducer, initialValue, storageObject, hysterisis=null)
 ```
 ### Returned
 - **state** - the current state of the hook
@@ -29,6 +29,7 @@ const [state, dispatchRef] = useStoredReducer(keyName, reducer, initialValue, wi
 - **keyName** (string)   - this is the key name the hook will use to read/write localStorage
 - **reducer** (callback) - pass in a function that handles the dispatch calls, [example](#reducer-function). This is different then reacts useReducer.
 - **initialValue** (any) - if the keyName is not found in localStorage, the initial state will be set to this, and it will be saved to localStorage
+- **storageObject** (optional, StorageObject) - what storage object to use. Can be localStorage, sessionStorage, or a custom object that implements Storage
 - **hysterisis** (optional, number) - this defines how long the hysterisis is before localStorage is written to. If not passed, or set to null, there is no hysterisis and state is stored to localStorage immediately.
 
 
@@ -77,7 +78,7 @@ function reducer(state, action, payload) {
 export default function ExampleComponent(){
     //We're reading/writing to localStorage key 'person' with a hysterisis of 500ms
     //If someones typing, it wont save to storage until they have a 500ms break in key events
-    const [state, dispatchRef] = useStoredReducer('person', reducer, {age: 0, name: ''}, 500);
+    const [state, dispatchRef] = useStoredReducer('person', reducer, {age: 0, name: ''}, localStorage, 500);
     return (
         <>
             <input type='text'  value={state?.age || ' '}   onChange={ (e) => dispatchRef.current('age', e.target.value) } />
