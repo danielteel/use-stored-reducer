@@ -275,4 +275,19 @@ describe('useStoredReducer',()=>{
         expect(localStorage.getItem('test-key')).toBe(JSON.stringify({name: 'Im Real', age: '11'}))
         expect(fakeStorage.getItem('test-key')).toBe(JSON.stringify({name: 'Im Fake', age: '22'}))
     });
+
+    
+    it("callback gets called",()=>{
+        //Setup
+        render(<UseStoredStateContainer storageObject={localStorage} keyName={'test-key'} defaultValue={{name: 'Bob', age: '23', callback:'callback'}}/>);
+        
+        const callbackInput = screen.getByDisplayValue('callback');
+
+
+        //Exercise
+        fireEvent.change(callbackInput, {target: {value: 'abcdefg'}});
+
+        //Assert
+       expect(screen.getAllByDisplayValue('abcdefg')).toHaveLength(1);
+    });
 });

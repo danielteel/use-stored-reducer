@@ -19,11 +19,11 @@ import {useStoredReducer} from '@dteel/use-stored-reducer';
 
 The hooks signature is 
 ```javascript
-const [state, dispatchRef] = useStoredReducer(keyName, reducer, initialValue, storageObject, hysterisis=null)
+const [state, {current: dispatchRef}] = useStoredReducer(keyName, reducer, initialValue, storageObject, hysterisis=null)
 ```
 ### Returned
 - **state** - the current state of the hook
-- **dispatchRef** - a ref to the dispatch function. To use, call dispatchRef.current('action', payload)
+- **dispatchRef** - a ref to the dispatch function. To use, call dispatchRef.current('action', payload, callback)
 
 ### Passed
 - **keyName** (string)   - this is the key name the hook will use to read/write localStorage
@@ -38,12 +38,13 @@ The parameters to your reducer function are,
 - **state** - the current state
 - **action** - a string representing an action
 - **payload** - this is the optional data sent with the action from dispatch()
+- **callback** - this is a function supplied from dispatch()
 
 Whatever you return from your reducer function is what the state gets set to.
 
 Below is a simple example
 ```javascript
-function reducer(state, action, payload) {
+function reducer(state, action, payload, callback) {
     switch (action) {
         case 'age':
             return {...state, age: Number(payload)};
@@ -51,6 +52,9 @@ function reducer(state, action, payload) {
             return {...state, name: payload};
         case 'reset':
             return {age: 0, name: ''};
+        case 'get':
+            callback(state);
+            return state;
         default:
             throw Error('undefined action');
     }
@@ -78,11 +82,11 @@ function reducer(state, action, payload) {
 export default function ExampleComponent(){
     //We're reading/writing to localStorage key 'person' with a hysterisis of 500ms
     //If someones typing, it wont save to storage until they have a 500ms break in key events
-    const [state, dispatchRef] = useStoredReducer('person', reducer, {age: 0, name: ''}, localStorage, 500);
+    const [state, {current: dispatch}] = useStoredReducer('person', reducer, {age: 0, name: ''}, localStorage, 500);
     return (
         <>
-            <input type='text'  value={state?.age || ' '}   onChange={ (e) => dispatchRef.current('age', e.target.value) } />
-            <input type='text'  value={state?.name || ' '}  onChange={ (e) => dispatchRef.current('name', e.target.value) } />
+            <input type='text'  value={state?.age || ' '}   onChange={ (e) => dispatch('age', e.target.value) } />
+            <input type='text'  value={state?.name || ' '}  onChange={ (e) => dispatch('name', e.target.value) } />
         </>
     );
 }

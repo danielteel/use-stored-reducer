@@ -3,8 +3,8 @@ import {initInDataStore, getFromDataStore, broadcastChange, subscribeToKeyEvents
 
 
 
-function dispatch (keyName, setRenderRef, reducer, stateRef, withHysterisis, storageObject, action, payload) {
-    const newValue = reducer(stateRef.current, action, payload);
+function dispatch (keyName, setRenderRef, reducer, stateRef, withHysterisis, storageObject, action, payload, callback) {
+    const newValue = reducer(stateRef.current, action, payload, callback);
     broadcastChange(storageObject, keyName, newValue, withHysterisis);
     setRenderRef.current();
 }
